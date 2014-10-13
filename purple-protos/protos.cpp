@@ -60,8 +60,15 @@ private:
 };
 
 int main(int argc, const char **argv) {
+#ifdef LLVM_34
+  CommonOptionsParser op(argc, argv);
+  ClangTool Tool(op.getCompilations(), op.getSourcePathList());
+
+  return Tool.run(newFrontendActionFactory<RewriterAction>());
+#else
   CommonOptionsParser op(argc, argv, ProtosCategory);
   ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
   return Tool.run(newFrontendActionFactory<RewriterAction>().get());
+#endif
 }
