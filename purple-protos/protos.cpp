@@ -32,6 +32,7 @@ public:
     else
       ss << ", ";
     ss << "{\"name\":\"" << f->getNameInfo().getAsString() << "\",";
+    ss << "\"variadic\":" << (f->isVariadic() ? "true" : "false") << ",";
     ss << "\"return\":" << jsonQualType(f->getResultType()) << ",";
     ss << "\"params\":[";
     bool first = true;

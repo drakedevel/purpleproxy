@@ -1,0 +1,4 @@
+*.o
+
+stubs.c
+purpleproxy.so
