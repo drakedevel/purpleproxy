@@ -22,3 +22,6 @@ CLANG_LIBS := \
 protos: protos.cpp
 	$(CXX) $(CXXFLAGS) $(LLVM_CXXFLAGS) $^ \
 		$(CLANG_LIBS) $(LLVM_LDFLAGS) -o $@
+
+decls.json: purple.sh protos
+	./purple.sh $(PIDGIN_PATH) > $@

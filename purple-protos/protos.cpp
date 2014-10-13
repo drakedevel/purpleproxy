@@ -20,16 +20,41 @@ using namespace clang::tooling;
 
 class RewriterVisitor : public RecursiveASTVisitor<RewriterVisitor> {
 public:
-  RewriterVisitor(Rewriter &R) : rewriter(R) {}
+  RewriterVisitor(Rewriter &R) : first(true), rewriter(R) {}
 
   bool VisitFunctionDecl(FunctionDecl *f) {
     std::stringstream ss;
-    ss << rewriter.getRewrittenText(f->getSourceRange()) << std::endl;
+    if (rewriter.getSourceMgr().getFilename(f->getLocation()).find("/libpurple/") == std::string::npos)
+        return true;
+
+    if (first)
+      first = false;
+    else
+      ss << ", ";
+    ss << "{\"name\":\"" << f->getNameInfo().getAsString() << "\",";
+    ss << "\"return\":" << jsonQualType(f->getResultType()) << ",";
+    ss << "\"params\":[";
+    bool first = true;
+    for (auto i = f->param_begin(); i != f->param_end(); ++i) {
+      if (first)
+        first = false;
+      else
+        ss << ", ";
+      ss << "{\"name\": \"" << (*i)->getName().str() << "\", \"type\":" << jsonQualType((*i)->getOriginalType()) << "}";
+    }
+    ss << "]}";
     llvm::outs() << ss.str();
     return true;
   }
 
 private:
+  bool first;
+  std::string jsonQualType(QualType type) {
+    std::stringstream ss;
+    ss << "\"" << type.getAsString() << "\"";
+    return ss.str();
+  }
+
   Rewriter &rewriter;
 };
 
@@ -38,8 +63,10 @@ public:
   RewriterConsumer(Rewriter &R) : visitor(R) {}
 
   virtual void HandleTranslationUnit(ASTContext &ctx) {
+    llvm::outs() << "{\"functions\":[";
     Decl *tu = ctx.getTranslationUnitDecl();
     visitor.TraverseDecl(tu);
+    llvm::outs() << "]}\n";
   }
 
 private:
