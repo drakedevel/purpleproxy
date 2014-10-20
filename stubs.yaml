@@ -1,3 +1,7 @@
+# Functions we proxy to the server
+proxy:
+  - purple_plugins_get_protocols
+
 # Functions we don't need to hook at all
 passthrough:
   - purple_strequal

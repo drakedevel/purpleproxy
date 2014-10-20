@@ -20,38 +20,79 @@ class StubConfig(object):
     def __init__(self, dct):
         self._dict = dct
 
+    def proxy(self, name):
+        return name in self._dict.get('proxy', [])
+
     def skip(self, name):
         return (name in self._dict.get('skip', []) or
                 name in self._dict.get('passthrough', []))
+
+def _to_capn_name(name):
+    i = 0
+    result = []
+    upper = False
+    while i < len(name):
+        if name[i] == '_':
+            upper = True
+        else:
+            result.append(name[i].upper() if upper else name[i])
+            upper = False
+        i += 1
+    return ''.join(result)
+
+def _emit_log(f, func, prefix=''):
+    f.write('fprintf(proxy.logf, "%s%%s\\n", "%s");' % (prefix, func['name']))
+
+def _emit_passthru(f, func):
+    f.write('typedef %s(*orig_type)(%s);' % (func['return'], _to_typlist(func['params'])))
+    f.write('static orig_type orig = NULL;')
+    f.write('if (!orig) { orig = (orig_type)dlsym(RTLD_NEXT, "%s"); }' % func['name'])
+    params = ', '.join('p%d' % i for i in range(len(func['params'])))
+    if func['return'] == 'void':
+        f.write('orig(%s);' % params)
+    else:
+        f.write('return orig(%s);' % params)
+
+def _emit_proxy(f, func):
+    _emit_log(f, func, prefix='PROXYING ')
+    f.write('auto& waitScope = proxy.rpcClient->getWaitScope();')
+    f.write('auto request = proxy.mb.%sRequest();' % _to_capn_name(func['name']))
+    for pi, param in enumerate(func['params']):
+        p_name = _to_capn_name('_' + param['name'])
+        f.write('request.set%s(p%d);' % (p_name, pi))
+    f.write('request.send().wait(waitScope);')
+    _emit_passthru(f, func)
+
+def _emit_logger(f, func):
+    _emit_log(f, func)
+    _emit_passthru(f, func)
 
 def main():
     with open('purple-protos/decls.json') as f:
         decls = json.load(f)
     with open('stubs.yaml') as f:
         config = StubConfig(yaml.safe_load(f.read()))
-    with open('stubs.c', 'w+') as f:
-        f.write('#define _GNU_SOURCE\n')
-        f.write('#include "purple.h"\n')
-        f.write('#include "init.h"\n')
-        f.write('#include <stdio.h>\n')
+    with open('stubs.c++', 'w+') as f:
+        f.write('#include <cstdio>\n')
         f.write('#include <dlfcn.h>\n')
+        f.write('#include "init.h"\n')
+        f.write('using purpleproxy::Proxy;\n')
+        f.write('extern "C" {\n')
+        f.write('#include "purple.h"\n')
         for func in sorted(decls['functions'], key=lambda k: k['name']):
-            if config.skip(func['name']):
+            if func['variadic'] or config.skip(func['name']):
+                if not config.skip(func['name']):
+                    print "WARNING: Skipping variadic %s" % (func['name'],)
                 continue
-            if func['variadic']:
-                print "WARNING: Skipping variadic %s" % (func['name'],)
-                continue
+
             f.write('%s %s(%s) {' % (func['return'], func['name'], _to_arglist(func['params'])))
-            f.write('purpleproxy_init();');
-            f.write('static %s(*orig)(%s) = NULL;' % (func['return'], _to_typlist(func['params'])))
-            f.write('if (!orig) { orig = dlsym(RTLD_NEXT, "%s"); }' % func['name'])
-            params = ', '.join('p%d' % i for i in range(len(func['params'])))
-            f.write('fprintf(purple_logf, "%%s\\n", "%s");' % func['name'])
-            if func['return'] == 'void':
-                f.write('orig(%s);' % params)
+            f.write('Proxy &proxy = Proxy::get();');
+            if config.proxy(func['name']):
+                _emit_proxy(f, func)
             else:
-                f.write('return orig(%s);' % params)
+                _emit_logger(f, func)
             f.write('}\n')
+        f.write('}\n')
 
 if __name__ == '__main__':
     main()

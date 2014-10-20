@@ -1,4 +1,7 @@
 *.o
+*.capnp.c++
+*.capnp.h
 
-stubs.c
+stubs.c++
 purpleproxy.so
+server
