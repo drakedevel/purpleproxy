@@ -13,6 +13,11 @@ all: purpleproxy.so server
 DEPS := $(SO_OBJS:.o=.d) $(SERVER_OBJS:.o=.d)
 -include $(DEPS)
 
+%.capnp:
+
+%.capnp.c++ %.capnp.h: %.capnp
+	capnp compile -oc++ $<
+
 %.o: %.c++ $(PROTO_HDRS)
 	$(CXX) $(CXXFLAGS) -c -std=c++11 -o $@ $<
 	$(CXX) $(CXXFLAGS) -c -std=c++11 -MM -MF $(patsubst %.o,%.d,$@) $< 
@@ -26,17 +31,9 @@ server: $(SERVER_OBJS)
 stubs.c++: codegen/genstub.py stubs.yaml
 	python2 -m codegen.genstub
 
-clean:
-	$(RM) purpleproxy.so server
-	$(RM) *.o *.d $(PROTO_HDRS)
-
 proxy.capnp: codegen/gencapnp.py stubs.yaml
 	python2 -m codegen.gencapnp purple-protos/decls.json stubs.yaml >$@
 
-%.capnp:
-
-%.capnp.c++ %.capnp.h: %.capnp
-	capnp compile -oc++ $<
-
-#%.o: %.c++
-#	$(CXX) -o $@ -c -std=c++11 $(CXXFLAGS) $<
+clean:
+	$(RM) purpleproxy.so server
+	$(RM) *.o *.d $(PROTO_HDRS)
