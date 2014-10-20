@@ -1,10 +1,21 @@
 CXXFLAGS = -g -fPIC `pkg-config --cflags capnp capnp-rpc glib-2.0 purple`
 LIBS = -ldl `pkg-config --libs capnp capnp-rpc glib-2.0`
 
-SO_OBJS = init.o stubs.o proxy.capnp.o
-SERVER_OBJS = server.o proxy.capnp.o
+PROTOS = proxy.capnp types.capnp
+PROTO_OBJS = $(PROTOS:.capnp=.capnp.o)
+PROTO_HDRS = $(PROTOS:.capnp=.capnp.h)
+
+SO_OBJS = init.o stubs.o $(PROTO_OBJS)
+SERVER_OBJS = server.o $(PROTO_OBJS)
 
 all: purpleproxy.so server
+
+DEPS := $(SO_OBJS:.o=.d) $(SERVER_OBJS:.o=.d)
+-include $(DEPS)
+
+%.o: %.c++ $(PROTO_HDRS)
+	$(CXX) $(CXXFLAGS) -c -std=c++11 -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -std=c++11 -MM -MF $(patsubst %.o,%.d,$@) $< 
 
 purpleproxy.so: $(SO_OBJS)
 	g++ -o $@ -shared $(LDFLAGS) $(LIBS) $^
@@ -12,17 +23,20 @@ purpleproxy.so: $(SO_OBJS)
 server: $(SERVER_OBJS)
 	g++ -o $@ $(LDFLAGS) $(LIBS) $^
 
-stubs.c++: genstub.py stubs.yaml
-	python genstub.py
+stubs.c++: codegen/genstub.py stubs.yaml
+	python2 -m codegen.genstub
 
 clean:
-	$(RM) purpleproxy.so $(SO_OBJS)
-	$(RM) server $(SERVER_OBJS)
+	$(RM) purpleproxy.so server
+	$(RM) *.o *.d $(PROTO_HDRS)
+
+proxy.capnp: codegen/gencapnp.py stubs.yaml
+	python2 -m codegen.gencapnp purple-protos/decls.json stubs.yaml >$@
 
 %.capnp:
 
 %.capnp.c++ %.capnp.h: %.capnp
 	capnp compile -oc++ $<
 
-%.o: %.c++
-	$(CXX) -o $@ -c -std=c++11 $(CXXFLAGS) $<
+#%.o: %.c++
+#	$(CXX) -o $@ -c -std=c++11 $(CXXFLAGS) $<

@@ -1,6 +1,6 @@
-#!/usr/bin/env python2
 import json
-import yaml
+
+from .config import StubConfig
 
 def _to_decl(type_, name):
     if '(*)' in type_:
@@ -15,17 +15,6 @@ def _to_arglist(types):
 
 def _to_typlist(types):
     return ','.join(p['type'] for p in types)
-
-class StubConfig(object):
-    def __init__(self, dct):
-        self._dict = dct
-
-    def proxy(self, name):
-        return name in self._dict.get('proxy', [])
-
-    def skip(self, name):
-        return (name in self._dict.get('skip', []) or
-                name in self._dict.get('passthrough', []))
 
 def _to_capn_name(name):
     i = 0
@@ -70,8 +59,7 @@ def _emit_logger(f, func):
 def main():
     with open('purple-protos/decls.json') as f:
         decls = json.load(f)
-    with open('stubs.yaml') as f:
-        config = StubConfig(yaml.safe_load(f.read()))
+    config = StubConfig.load('stubs.yaml')
     with open('stubs.c++', 'w+') as f:
         f.write('#include <cstdio>\n')
         f.write('#include <dlfcn.h>\n')

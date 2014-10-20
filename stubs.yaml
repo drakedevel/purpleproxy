@@ -1,3 +1,8 @@
+# Type information not provided by prototypes
+typeinfo:
+  purple_plugins_get_protocols:
+    return: 'List(T.Plugin)'
+
 # Functions we proxy to the server
 proxy:
   - purple_plugins_get_protocols
