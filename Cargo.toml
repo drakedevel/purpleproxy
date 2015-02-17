@@ -15,7 +15,8 @@ crate-type = ["dylib"]
 
 [build-dependencies.rust-bindgen]
 
-path = "../rust-bindgen"
+git = "https://github.com/kemurphy/rust-bindgen.git"
+branch = "regex-filter"
 
 [build-dependencies]
 
