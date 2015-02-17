@@ -33,7 +33,11 @@ public:
       ss << ", ";
     ss << "{\"name\":\"" << f->getNameInfo().getAsString() << "\",";
     ss << "\"variadic\":" << (f->isVariadic() ? "true" : "false") << ",";
+#ifdef LLVM_34
     ss << "\"return\":" << jsonQualType(f->getResultType()) << ",";
+#else
+    ss << "\"return\":" << jsonQualType(f->getReturnType()) << ",";
+#endif
     ss << "\"params\":[";
     bool first = true;
     for (auto i = f->param_begin(); i != f->param_end(); ++i) {
