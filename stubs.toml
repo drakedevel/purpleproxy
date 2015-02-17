@@ -1,0 +1,89 @@
+# Type information not provided by prototypes
+[typeinfo.purple_plugins_get_protocols]
+return = 'List(T.Plugin)'
+
+[config]
+
+# Functions we proxy to the server
+proxy = [
+    "purple_plugins_get_protocols",
+]
+
+# Functions we don't need to hook at all
+passthrough = [
+    "purple_strequal",
+]
+
+# Variadic functions we can't implement automatically
+skip = [
+    "purple_account_set_status",
+    "purple_debug",
+    "purple_debug_error",
+    "purple_debug_fatal",
+    "purple_debug_info",
+    "purple_debug_misc",
+    "purple_debug_warning",
+    "purple_log_logger_new",
+    "purple_media_error",
+    "purple_plugin_ipc_call",
+    "purple_plugin_ipc_register",
+    "purple_prpl_got_account_status",
+    "purple_prpl_got_user_status",
+    "purple_request_action",
+    "purple_request_action_with_icon",
+    "purple_request_choice",
+    "purple_signal_emit",
+    "purple_signal_emit_return_1",
+    "purple_signal_register",
+    "purple_status_type_add_attrs",
+    "purple_status_type_new_with_attrs",
+    "purple_stringref_printf",
+    "purple_value_new",
+    "purple_value_new_outgoing",
+#     "purple_signal_connect_priority_vargs",
+#     "purple_signal_connect_vargs",
+#     "purple_signal_emit_vargs",
+#     "purple_signal_emit_vargs_return_1",
+#     "purple_marshal_VOID",
+#     "purple_marshal_VOID__INT",
+#     "purple_marshal_VOID__INT_INT",
+#     "purple_marshal_VOID__POINTER",
+#     "purple_marshal_VOID__POINTER_UINT",
+#     "purple_marshal_VOID__POINTER_INT_INT",
+#     "purple_marshal_VOID__POINTER_INT_POINTER",
+#     "purple_marshal_VOID__POINTER_POINTER",
+#     "purple_marshal_VOID__POINTER_POINTER_UINT",
+#     "purple_marshal_VOID__POINTER_POINTER_UINT_UINT",
+#     "purple_marshal_VOID__POINTER_POINTER_POINTER",
+#     "purple_marshal_VOID__POINTER_POINTER_POINTER_POINTER",
+#     "purple_marshal_VOID__POINTER_POINTER_POINTER_POINTER_POINTER",
+#     "purple_marshal_VOID__POINTER_POINTER_POINTER_UINT",
+#     "purple_marshal_VOID__POINTER_POINTER_POINTER_POINTER_UINT",
+#     "purple_marshal_VOID__POINTER_POINTER_POINTER_UINT_UINT",
+#     "purple_marshal_INT__INT",
+#     "purple_marshal_INT__INT_INT",
+#     "purple_marshal_INT__POINTER_POINTER",
+#     "purple_marshal_INT__POINTER_POINTER_POINTER",
+#     "purple_marshal_INT__POINTER_POINTER_POINTER_POINTER_POINTER",
+#     "purple_marshal_BOOLEAN__POINTER",
+#     "purple_marshal_BOOLEAN__POINTER_POINTER",
+#     "purple_marshal_BOOLEAN__POINTER_BOOLEAN",
+#     "purple_marshal_BOOLEAN__POINTER_POINTER_POINTER",
+#     "purple_marshal_BOOLEAN__POINTER_POINTER_UINT",
+#     "purple_marshal_BOOLEAN__POINTER_POINTER_POINTER_UINT",
+#     "purple_marshal_BOOLEAN__POINTER_POINTER_POINTER_POINTER",
+#     "purple_marshal_BOOLEAN__POINTER_POINTER_POINTER_POINTER_POINTER",
+#     "purple_marshal_BOOLEAN__POINTER_POINTER_POINTER_POINTER_UINT",
+#     "purple_marshal_BOOLEAN__POINTER_POINTER_POINTER_POINTER_POINTER_POINTER",
+#     "purple_marshal_BOOLEAN__INT_POINTER",
+#     "purple_marshal_POINTER__POINTER",
+#     "purple_marshal_POINTER__POINTER_INT",
+#     "purple_marshal_POINTER__POINTER_INT64",
+#     "purple_marshal_POINTER__POINTER_INT_BOOLEAN",
+#     "purple_marshal_POINTER__POINTER_INT64_BOOLEAN",
+#     "purple_marshal_POINTER__POINTER_POINTER",
+#     "purple_status_type_add_attrs_vargs",
+#     "purple_request_choice_varg",
+#     "purple_request_action_varg",
+#     "purple_request_action_with_icon_varg",
+]

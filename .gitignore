@@ -7,4 +7,9 @@
 proxy.capnp
 stubs.c++
 purpleproxy.so
+libpurpleproxy.so
 server
+nullclient
+purple*.log
+target
+Cargo.lock
